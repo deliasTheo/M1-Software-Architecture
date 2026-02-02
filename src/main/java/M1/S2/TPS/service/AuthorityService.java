@@ -1,13 +1,17 @@
 package M1.S2.TPS.service;
 
-import M1.S2.TPS.entities.Authority;
-import M1.S2.TPS.repository.AuthorityRepository;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
+import M1.S2.TPS.dto.AuthorityDTO;
+import M1.S2.TPS.entities.Authority;
+import M1.S2.TPS.mapper.AuthorityMapper;
+import M1.S2.TPS.repository.AuthorityRepository;
 
 @Service
 @Transactional
@@ -16,29 +20,36 @@ public class AuthorityService {
     @Autowired
     private AuthorityRepository authorityRepository;
     
-    public Authority create(Authority authority) {
-        if (authority.getName() == null || authority.getName().isEmpty()) {
+    @Autowired
+    private AuthorityMapper authorityMapper;
+    
+    public AuthorityDTO create(AuthorityDTO authority) {
+        Authority authorityEntity = authorityMapper.toEntity(authority);
+        if (authorityEntity.getName() == null || authorityEntity.getName().isEmpty()) {
             throw new IllegalArgumentException("Authority name cannot be null or empty");
         }
-        return authorityRepository.save(authority);
+        return authorityMapper.toDTO(authorityRepository.save(authorityEntity));
     }
     
-    public Optional<Authority> getById(Long id) {
-        return authorityRepository.findById(id);
+    public Optional<AuthorityDTO> getById(Long id) {
+        return authorityRepository.findById(id).map(authorityMapper::toDTO);
     }
     
-    public Optional<Authority> getByName(String name) {
-        return authorityRepository.findByName(name);
+    public Optional<AuthorityDTO> getByName(String name) {
+        return authorityRepository.findByName(name).map(authorityMapper::toDTO);
     }
     
-    public List<Authority> getAll() {
-        return authorityRepository.findAll();
+    public List<AuthorityDTO> getAll() {
+        return authorityRepository.findAll().stream().map(authorityMapper::toDTO).collect(Collectors.toList());
     }
     
-    public Authority update(Long id, Authority authorityDetails) {
-        Optional<Authority> authority = authorityRepository.findById(id);
+    public AuthorityDTO update(AuthorityDTO authorityDetails) {
+        
+        Optional<Authority> authority = authorityRepository.findById(authorityDetails.getId());
+
+
         if (authority.isEmpty()) {
-            throw new RuntimeException("Authority not found with id: " + id);
+            throw new RuntimeException("Authority not found with id: " + authorityDetails.getId());
         }
         
         Authority existingAuthority = authority.get();
@@ -49,7 +60,8 @@ public class AuthorityService {
             existingAuthority.setDescription(authorityDetails.getDescription());
         }
         
-        return authorityRepository.save(existingAuthority);
+        AuthorityDTO autority =  authorityMapper.toDTO(authorityRepository.save(existingAuthority));
+        return autority;
     }
     
     public void delete(Long id) {

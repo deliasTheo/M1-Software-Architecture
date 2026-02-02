@@ -1,14 +1,15 @@
 package M1.S2.TPS.service;
 
-import M1.S2.TPS.entities.Token;
-import M1.S2.TPS.repository.TokenRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import M1.S2.TPS.entities.Token;
+import M1.S2.TPS.repository.TokenRepository;
 
 @Service
 @Transactional
@@ -27,6 +28,7 @@ public class TokenService {
         return tokenRepository.save(token);
     }
     
+
     public Optional<Token> getById(Long id) {
         return tokenRepository.findById(id);
     }
