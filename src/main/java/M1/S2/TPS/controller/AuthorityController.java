@@ -1,14 +1,22 @@
 package M1.S2.TPS.controller;
 
-import M1.S2.TPS.entities.Authority;
-import M1.S2.TPS.service.AuthorityService;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Optional;
+import M1.S2.TPS.entities.Authority;
+import M1.S2.TPS.service.AuthorityService;
 
 @RestController
 @RequestMapping("/api/authorities")
@@ -23,7 +31,7 @@ public class AuthorityController {
             Authority createdAuthority = authorityService.create(authority);
             return new ResponseEntity<>(createdAuthority, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
     
@@ -53,7 +61,7 @@ public class AuthorityController {
             Authority updatedAuthority = authorityService.update(id, authorityDetails);
             return new ResponseEntity<>(updatedAuthority, HttpStatus.OK);
         } catch (RuntimeException e) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
     
