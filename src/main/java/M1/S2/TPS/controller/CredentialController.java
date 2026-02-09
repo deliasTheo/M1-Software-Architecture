@@ -51,7 +51,7 @@ public class CredentialController {
     @PutMapping("/{id}")
     public ResponseEntity<CredentialDTO> update(@PathVariable Long id, @RequestBody CredentialDTO credentialDetails) {
         try {
-            CredentialDTO updatedCredential = credentialService.update(id, credentialDetails);
+            CredentialDTO updatedCredential = credentialService.update(credentialDetails);
             return new ResponseEntity<>(updatedCredential, HttpStatus.OK);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

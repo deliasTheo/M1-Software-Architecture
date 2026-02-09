@@ -38,10 +38,10 @@ public class CredentialService {
         return credentialRepository.findAll().stream().map(CredentialMapper::toDTO).collect(Collectors.toList());
     }
     
-    public CredentialDTO update(Long id, CredentialDTO credentialDetails) {
+    public CredentialDTO update( CredentialDTO credentialDetails) {
         Optional<Credential> credential = credentialRepository.findById(credentialDetails.getId());
         if (credential.isEmpty()) {
-            throw new RuntimeException("Credential not found with id: " + id);
+            throw new RuntimeException("Credential not found with id: " + credentialDetails.getId());
         }
         
         Credential existingCredential = credential.get();

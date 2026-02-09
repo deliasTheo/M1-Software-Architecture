@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import M1.S2.TPS.entities.Token;
+import M1.S2.TPS.dto.TokenDTO;
 import M1.S2.TPS.service.TokenService;
 
 @RestController
@@ -26,9 +26,9 @@ public class TokenController {
     private TokenService tokenService;
     
     @PostMapping
-    public ResponseEntity<Token> create(@RequestBody Token token) {
+    public ResponseEntity<TokenDTO> create(@RequestBody TokenDTO token) {
         try {
-            Token createdToken = tokenService.create(token);
+            TokenDTO createdToken = tokenService.create(token);
             return new ResponseEntity<>(createdToken, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -36,35 +36,35 @@ public class TokenController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Token> getById(@PathVariable Long id) {
-        Optional<Token> token = tokenService.getById(id);
+    public ResponseEntity<TokenDTO> getById(@PathVariable Long id) {
+        Optional<TokenDTO> token = tokenService.getById(id);
         return token.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
     
     @GetMapping("/value/{value}")
-    public ResponseEntity<Token> getByValue(@PathVariable String value) {
-        Optional<Token> token = tokenService.getByValue(value);
+    public ResponseEntity<TokenDTO> getByValue(@PathVariable String value) {
+        Optional<TokenDTO> token = tokenService.getByValue(value);
         return token.map(value2 -> new ResponseEntity<>(value2, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
     
     @GetMapping
-    public ResponseEntity<List<Token>> getAll() {
-        List<Token> tokens = tokenService.getAll();
+    public ResponseEntity<List<TokenDTO>> getAll() {
+        List<TokenDTO> tokens = tokenService.getAll();
         return new ResponseEntity<>(tokens, HttpStatus.OK);
     }
     
     @GetMapping("/expired")
-    public ResponseEntity<List<Token>> getExpiredTokens() {
-        List<Token> expiredTokens = tokenService.getExpiredTokens();
+    public ResponseEntity<List<TokenDTO>> getExpiredTokens() {
+        List<TokenDTO> expiredTokens = tokenService.getExpiredTokens();
         return new ResponseEntity<>(expiredTokens, HttpStatus.OK);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Token> update(@PathVariable Long id, @RequestBody Token tokenDetails) {
+    public ResponseEntity<TokenDTO> update(@PathVariable Long id, @RequestBody TokenDTO tokenDetails) {
         try {
-            Token updatedToken = tokenService.update(id, tokenDetails);
+            TokenDTO updatedToken = tokenService.update(tokenDetails);
             return new ResponseEntity<>(updatedToken, HttpStatus.OK);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
