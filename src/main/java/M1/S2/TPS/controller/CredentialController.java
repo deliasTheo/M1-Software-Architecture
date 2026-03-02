@@ -16,48 +16,57 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import M1.S2.TPS.dto.CredentialDTO;
+import M1.S2.TPS.entities.Credential;
+import M1.S2.TPS.mapper.CredentialMapper;
 import M1.S2.TPS.service.CredentialService;
 
 @RestController
 @RequestMapping("/api/credentials")
 public class CredentialController {
-    
+
     @Autowired
     private CredentialService credentialService;
-    
+
+    @Autowired
+    private CredentialMapper credentialMapper;
+
     @PostMapping
     public ResponseEntity<CredentialDTO> create(@RequestBody CredentialDTO credential) {
         try {
-            CredentialDTO createdCredential = credentialService.create(credential);
-            return new ResponseEntity<>(createdCredential, HttpStatus.CREATED);
+            Credential entity = credentialMapper.toEntity(credential);
+            Credential created = credentialService.create(entity);
+            return new ResponseEntity<>(credentialMapper.toDTO(created), HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<CredentialDTO> getById(@PathVariable Long id) {
-        Optional<CredentialDTO> credential = credentialService.getById(id);
-        return credential.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+        Optional<Credential> credential = credentialService.getById(id);
+        return credential.map(e -> new ResponseEntity<>(credentialMapper.toDTO(e), HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
-    
+
     @GetMapping
     public ResponseEntity<List<CredentialDTO>> getAll() {
-        List<CredentialDTO> credentials = credentialService.getAll();
-        return new ResponseEntity<>(credentials, HttpStatus.OK);
+        List<Credential> entities = credentialService.getAll();
+        List<CredentialDTO> dtos = entities.stream().map(credentialMapper::toDTO).toList();
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
-    
+
     @PutMapping("/{id}")
     public ResponseEntity<CredentialDTO> update(@PathVariable Long id, @RequestBody CredentialDTO credentialDetails) {
         try {
-            CredentialDTO updatedCredential = credentialService.update(credentialDetails);
-            return new ResponseEntity<>(updatedCredential, HttpStatus.OK);
+            credentialDetails.setId(id);
+            Credential entity = credentialMapper.toEntity(credentialDetails);
+            Credential updated = credentialService.update(entity);
+            return new ResponseEntity<>(credentialMapper.toDTO(updated), HttpStatus.OK);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         try {

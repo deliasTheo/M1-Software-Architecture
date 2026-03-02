@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import M1.S2.TPS.dto.IdentityDTO;
+import M1.S2.TPS.entities.Identity;
+import M1.S2.TPS.mapper.IdentityMapper;
 import M1.S2.TPS.service.IdentityService;
 
 /**
@@ -40,12 +42,12 @@ import M1.S2.TPS.service.IdentityService;
 @RequestMapping("/api/identities")
 public class IdentityController {
     
-    /**
-     * Service contenant la logique métier
-     */
     @Autowired
     private IdentityService identityService;
-    
+
+    @Autowired
+    private IdentityMapper identityMapper;
+
     /**
      * Créer une nouvelle identité
      * 
@@ -59,10 +61,10 @@ public class IdentityController {
     @PostMapping
     public ResponseEntity<IdentityDTO> create(@RequestBody IdentityDTO dto) {
         try {
-            IdentityDTO created = identityService.create(dto);
-            return new ResponseEntity<>(created, HttpStatus.CREATED);
+            Identity entity = identityMapper.toEntity(dto);
+            Identity created = identityService.create(entity);
+            return new ResponseEntity<>(identityMapper.toDTO(created), HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
-            // uid invalide ou existe déjà
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
@@ -79,8 +81,8 @@ public class IdentityController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<IdentityDTO> getById(@PathVariable Long id) {
-        Optional<IdentityDTO> dto = identityService.getById(id);
-        return dto.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+        Optional<Identity> entity = identityService.getById(id);
+        return entity.map(e -> new ResponseEntity<>(identityMapper.toDTO(e), HttpStatus.OK))
                   .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
     
@@ -96,8 +98,8 @@ public class IdentityController {
      */
     @GetMapping("/uid/{uid}")
     public ResponseEntity<IdentityDTO> getByUid(@PathVariable String uid) {
-        Optional<IdentityDTO> dto = identityService.getByUid(uid);
-        return dto.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+        Optional<Identity> entity = identityService.getByUid(uid);
+        return entity.map(e -> new ResponseEntity<>(identityMapper.toDTO(e), HttpStatus.OK))
                   .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
     
@@ -110,8 +112,9 @@ public class IdentityController {
      */
     @GetMapping
     public ResponseEntity<List<IdentityDTO>> getAll() {
-        List<IdentityDTO> identities = identityService.getAll();
-        return new ResponseEntity<>(identities, HttpStatus.OK);
+        List<Identity> entities = identityService.getAll();
+        List<IdentityDTO> dtos = entities.stream().map(identityMapper::toDTO).toList();
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
     
     /**
@@ -129,15 +132,13 @@ public class IdentityController {
     @PutMapping("/{id}")
     public ResponseEntity<IdentityDTO> update(@PathVariable Long id, @RequestBody IdentityDTO dto) {
         try {
-            // S'assurer que l'ID dans le DTO correspond à l'ID dans l'URL
             dto.setId(id);
-            IdentityDTO updated = identityService.update(dto);
-            return new ResponseEntity<>(updated, HttpStatus.OK);
+            Identity entity = identityMapper.toEntity(dto);
+            Identity updated = identityService.update(entity);
+            return new ResponseEntity<>(identityMapper.toDTO(updated), HttpStatus.OK);
         } catch (IllegalArgumentException e) {
-            // uid invalide (existe déjà)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         } catch (RuntimeException e) {
-            // Identité non trouvée
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }

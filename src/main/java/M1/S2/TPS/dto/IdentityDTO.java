@@ -55,4 +55,8 @@ public class IdentityDTO {
         this.id = id;
         this.uid = uid;
     }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

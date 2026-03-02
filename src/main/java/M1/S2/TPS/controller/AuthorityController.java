@@ -16,55 +16,63 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import M1.S2.TPS.dto.AuthorityDTO;
+import M1.S2.TPS.entities.Authority;
+import M1.S2.TPS.mapper.AuthorityMapper;
 import M1.S2.TPS.service.AuthorityService;
 
 @RestController
 @RequestMapping("/api/authorities")
 public class AuthorityController {
-    
+
     @Autowired
     private AuthorityService authorityService;
-    
+
+    @Autowired
+    private AuthorityMapper authorityMapper;
+
     @PostMapping
     public ResponseEntity<AuthorityDTO> create(@RequestBody AuthorityDTO authority) {
         try {
-            AuthorityDTO createdAuthority = authorityService.create(authority);
-            return new ResponseEntity<>(createdAuthority, HttpStatus.CREATED);
+            Authority entity = authorityMapper.toEntity(authority);
+            Authority created = authorityService.create(entity);
+            return new ResponseEntity<>(authorityMapper.toDTO(created), HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<AuthorityDTO> getById(@PathVariable Long id) {
-        Optional<AuthorityDTO> authority = authorityService.getById(id);
-        return authority.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+        Optional<Authority> authority = authorityService.getById(id);
+        return authority.map(e -> new ResponseEntity<>(authorityMapper.toDTO(e), HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
-    
+
     @GetMapping("/name/{name}")
     public ResponseEntity<AuthorityDTO> getByName(@PathVariable String name) {
-        Optional<AuthorityDTO> authority = authorityService.getByName(name);
-        return authority.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+        Optional<Authority> authority = authorityService.getByName(name);
+        return authority.map(e -> new ResponseEntity<>(authorityMapper.toDTO(e), HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
-    
+
     @GetMapping
     public ResponseEntity<List<AuthorityDTO>> getAll() {
-        List<AuthorityDTO> authorities = authorityService.getAll();
-        return new ResponseEntity<>(authorities, HttpStatus.OK);
+        List<Authority> entities = authorityService.getAll();
+        List<AuthorityDTO> dtos = entities.stream().map(authorityMapper::toDTO).toList();
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
-    
+
     @PutMapping("/{id}")
     public ResponseEntity<AuthorityDTO> update(@RequestBody AuthorityDTO authorityDetails) {
         try {
-            AuthorityDTO updatedAuthority = authorityService.update(authorityDetails);
-            return new ResponseEntity<>(updatedAuthority, HttpStatus.OK);
+            Authority entity = authorityMapper.toEntity(authorityDetails);
+            Authority updated = authorityService.update(entity);
+            return new ResponseEntity<>(authorityMapper.toDTO(updated), HttpStatus.OK);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         try {
