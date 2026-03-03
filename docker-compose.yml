@@ -17,6 +17,11 @@ services:
     build: ./auth
     container_name: auth
     environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/authdb
+      SPRING_DATASOURCE_USERNAME: authuser
+      SPRING_DATASOURCE_PASSWORD: authpass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_SQL_INIT_MODE: never
       # RabbitMQ (TP: ports 5672/15672) :contentReference[oaicite:2]{index=2}
       #SPRING_RABBITMQ_HOST: rabbitmq
       #SPRING_RABBITMQ_PORT: 5672
@@ -86,6 +91,21 @@ services:
     container_name: servB
     expose:
       - "8080"
+    networks:
+      - appnet
+
+  db:
+    image: postgres:16-alpine
+    container_name: db
+    environment:
+      POSTGRES_DB: authdb
+      POSTGRES_USER: authuser
+      POSTGRES_PASSWORD: authpass
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
     networks:
       - appnet
 
