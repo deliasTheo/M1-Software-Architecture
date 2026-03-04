@@ -1,38 +1,43 @@
 package M1.S2.TPS.entities;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Table(name = "credentials")
+@Table(name = "credential")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Credential {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     
-    @Column(nullable = false)
-    private String value;
+    @ManyToOne()
+    @JoinColumn(name = "identity_id", nullable = false)
+    private Identity identity;
     
-    public Credential() {
-    }
+    @Column(nullable = false, name = "password_hash")
+    private String passwordHash;
     
-    public Credential(String value) {
-        this.value = value;
-    }
+    @Column(nullable = false, name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
     
-    public Long getId() {
-        return id;
-    }
+    @Column(nullable = false, name = "updated_at")
+    private LocalDateTime updatedAt = LocalDateTime.now();
     
-    public void setId(Long id) {
-        this.id = id;
-    }
-    
-    public String getValue() {
-        return value;
-    }
-    
-    public void setValue(String value) {
-        this.value = value;
-    }
 }
