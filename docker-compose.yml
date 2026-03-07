@@ -73,17 +73,17 @@ services:
     networks:
       - appnet
 
-  servA:
+  serv_a:
     build: ./servA
-    container_name: servA
+    container_name: serva
     expose:
       - "8080"
     networks:
       - appnet
 
-  servB:
+  serv_b:
     build: ./servB
-    container_name: servB
+    container_name: servb
     expose:
       - "8080"
     networks:
