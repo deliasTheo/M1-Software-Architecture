@@ -1,5 +1,8 @@
 package M1.S2.TPS.service;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class PasswordService {
     /*
         hashPassword(...)
@@ -8,5 +11,9 @@ public class PasswordService {
 
         checkPasswordStrength(...)
     */
+
+    public String hashPassword(String password) {
+        return password;
+    }
     
 }

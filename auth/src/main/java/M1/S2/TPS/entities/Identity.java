@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -45,6 +46,9 @@ public class Identity {
 
     @Column(nullable = false, name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @OneToOne(mappedBy = "identity")
+    private Credential credential;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

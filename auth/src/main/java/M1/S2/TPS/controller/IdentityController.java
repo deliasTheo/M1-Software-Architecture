@@ -10,11 +10,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import M1.S2.TPS.dto.IdentityDTO;
 import M1.S2.TPS.dto.TokenDTO;
+import M1.S2.TPS.service.AuthentificationService;
 
-
+import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/auth_service/identity")
+@RequiredArgsConstructor
 public class IdentityController {
+    private final AuthentificationService authentificationService;
     
     // POST : /auth_service/identity/register
     // GET : /auth_service/identity/login
@@ -22,6 +25,7 @@ public class IdentityController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody IdentityDTO identity) {
+        authentificationService.register(identity);
         return ResponseEntity.ok("Compte créé");
     }
 

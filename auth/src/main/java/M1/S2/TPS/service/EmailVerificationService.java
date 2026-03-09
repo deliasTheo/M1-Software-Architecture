@@ -2,6 +2,7 @@ package M1.S2.TPS.service;
 
 import org.springframework.stereotype.Service;
 
+import M1.S2.TPS.entities.Identity;
 import lombok.RequiredArgsConstructor;
 
 
@@ -26,6 +27,11 @@ public class EmailVerificationService {
     */
 
 
-        private TokenService tokenService;
-        private EventPublisherService eventPublisherService;
+    private final TokenService tokenService;
+
+    public void publishUserRegisteredEvent(Identity identity) {
+        // TODO: Implement this method
+    }
+
+  
 }
