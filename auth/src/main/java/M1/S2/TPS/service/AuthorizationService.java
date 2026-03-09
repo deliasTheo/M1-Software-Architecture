@@ -21,13 +21,17 @@ public class AuthorizationService {
             throw new ServiceNotFoundException(targetService);
         }
 
+        String token = TokenService.extractBearerToken(authorizationHeader);
         // Get identity from token (throws InvalidTokenException if invalid/expired)
-        Identity identity = tokenService.getIdentityBySessionToken(TokenService.extractBearerToken(authorizationHeader));
-        
+        Identity identity = tokenService.getIdentityBySessionToken(token);
+
+        tokenService.verifyToken(identity, token);    
+
         // Check if user has access to the service
         if (!hasAccessToService(identity, targetService)) {
             throw new InsufficientPermissionsException(targetService);
         }
+        
     }
 
     private boolean hasAccessToService(Identity identity, String targetService) {

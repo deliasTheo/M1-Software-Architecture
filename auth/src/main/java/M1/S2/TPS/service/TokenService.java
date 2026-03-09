@@ -1,9 +1,12 @@
 package M1.S2.TPS.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import M1.S2.TPS.entities.AbstractToken;
 import M1.S2.TPS.entities.Identity;
 import M1.S2.TPS.entities.SessionToken;
 import M1.S2.TPS.entities.ValidationToken;
@@ -36,16 +39,18 @@ public class TokenService {
         return sessionToken;
     }
 
-    public boolean verifyToken(Identity identity, String token) {
-        // vérifié que le token est calide est non expiré
+    public void verifyToken(Identity identity, String token) {           
+        List<AbstractToken> tokens = new ArrayList<>();
+        for (SessionToken sessionToken : identity.getSessionTokens()) {
+            tokens.add(sessionToken);
+        }
+        for (ValidationToken validationToken : identity.getValidationTokens()) {
+            tokens.add(validationToken);
+        }
 
-            // utiliser getIdentityBySessionToken ou getIdentityByValidationToken
-        // A utiliser, si el token est expirer : 
-        //  if (isTokenExpired(sessionToken.getExpiresAt())) {
-            // throw new InvalidTokenException();
-        // }
-
-        return true;
+        if (!tokens.stream().anyMatch(abstractToken -> abstractToken.getTokenHash().equals(token) || isTokenExpired(abstractToken.getExpiresAt()))) {
+            throw new InvalidTokenException();
+        }
     }
 
      // todo : semy

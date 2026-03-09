@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import M1.S2.TPS.dto.IdentityDTO;
 import M1.S2.TPS.dto.TokenDTO;
 import M1.S2.TPS.service.AuthentificationService;
+import M1.S2.TPS.service.EmailVerificationService;
 
 import lombok.RequiredArgsConstructor;
 @RestController
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class IdentityController {
     private final AuthentificationService authentificationService;
+    private final EmailVerificationService emailVerificationService;
     
     // POST : /auth_service/identity/register
     // GET : /auth_service/identity/login
@@ -37,6 +39,7 @@ public class IdentityController {
 
     @GetMapping("/validate_email")
     public ResponseEntity<String> validateEmail(@RequestParam String token) {
+        emailVerificationService.validateEmail(token);
         return ResponseEntity.ok("Email validé");
     }
 

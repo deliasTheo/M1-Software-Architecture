@@ -14,11 +14,13 @@ public class PasswordService {
         checkPasswordStrength(...)
     */
 
+    // todo : semy
     public String hashPassword(String password) {
         return password;
     }
 
+    // todo : semy
     public boolean verifyPassword(Identity identity, String rawPassword) {
-        return true; // todo
+        return true;
     }
 }
