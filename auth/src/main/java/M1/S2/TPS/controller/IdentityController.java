@@ -29,9 +29,9 @@ public class IdentityController {
         return ResponseEntity.ok("Compte créé");
     }
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<TokenDTO> login(@RequestBody IdentityDTO identity) {
-        TokenDTO token = new TokenDTO("token");
+        TokenDTO token = new TokenDTO(authentificationService.login(identity).getTokenHash());
         return ResponseEntity.ok(token);
     }
 

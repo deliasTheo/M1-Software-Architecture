@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -47,7 +48,7 @@ public class Identity {
     @Column(nullable = false, name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @OneToOne(mappedBy = "identity")
+    @OneToOne(mappedBy = "identity", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Credential credential;
 
     @ManyToMany(fetch = FetchType.LAZY)
