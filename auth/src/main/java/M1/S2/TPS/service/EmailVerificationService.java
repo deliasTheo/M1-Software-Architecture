@@ -22,8 +22,6 @@ public class EmailVerificationService {
         Identity identity = tokenService.getIdentityByValidationToken(token);
 
         // si le token est valide, mettre la verification a true, sinon, generer des erreurs : 
-        // 400  | Token invalide 
-        // 410  | Token expiré
         // 409  | Déjà validé
 
         tokenService.verifyToken(identity, token);
