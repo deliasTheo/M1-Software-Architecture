@@ -1,17 +1,15 @@
 services:
-  #nginx:
-  #  image: nginx:1.27-alpine
-  #  container_name: nginx
-  #  ports:
-  #    - "8080:80"
-  #  volumes:
-  #    - ./nginx/conf.d:/etc/nginx/conf.d:ro
-  #  depends_on:
-  #    - auth
-  #    - servA
-  #    - servB
-  #  networks:
-  #    - appnet
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    ports:
+      - "8080:80"
+    depends_on:
+      - auth
+      - serv_a
+      - serv_b
+    networks:
+      - appnet
 
   auth:
     build: ./auth
