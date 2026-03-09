@@ -1,0 +1,12 @@
+# OS
+.DS_Store
+
+# Editors
+.vscode/
+
+# Build outputs
+target/
+**/target/
+
+# Personal workspace (do not version)
+workspace/
