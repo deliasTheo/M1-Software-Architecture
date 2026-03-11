@@ -19,6 +19,11 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
+    @ExceptionHandler(EmailAlreadyVerifiedException.class)
+    public ResponseEntity<Map<String, String>> handleEmailAlreadyVerified(EmailAlreadyVerifiedException ex) {
+        return buildErrorResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
     @ExceptionHandler(InvalidDataException.class)
     public ResponseEntity<Map<String, String>> handleInvalidData(InvalidDataException ex) {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
