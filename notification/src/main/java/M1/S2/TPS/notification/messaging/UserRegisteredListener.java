@@ -34,10 +34,6 @@ public class UserRegisteredListener {
             throw new IllegalArgumentException("Invalid UserRegistered event: missing email");
         }
 
-        if (event.data().tokenId() == null || event.data().tokenId().isBlank()) {
-            throw new IllegalArgumentException("Invalid UserRegistered event: missing tokenId");
-        }
-
         if (event.data().tokenClear() == null || event.data().tokenClear().isBlank()) {
             throw new IllegalArgumentException(
                     "Invalid UserRegistered event: missing tokenClear (required in simple TP flow)"
@@ -49,7 +45,6 @@ public class UserRegisteredListener {
 
         verificationEmailService.sendVerificationEmail(
                 event.data().email(),
-                event.data().tokenId(),
                 event.data().tokenClear()
         );
 

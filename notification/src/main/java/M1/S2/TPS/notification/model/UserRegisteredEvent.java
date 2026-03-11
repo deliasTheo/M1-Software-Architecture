@@ -9,7 +9,6 @@ public record UserRegisteredEvent(
     public record Data(
             String userId,
             String email,
-            String tokenId,
             String tokenClear
     ) {
     }

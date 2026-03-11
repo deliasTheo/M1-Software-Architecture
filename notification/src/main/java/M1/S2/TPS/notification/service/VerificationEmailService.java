@@ -20,9 +20,9 @@ public class VerificationEmailService {
         this.mailSender = mailSender;
     }
 
-    public void sendVerificationEmail(String to, String tokenId, String tokenClear) {
-        String verificationLink = publicBaseUrl + "/auth_service/identity/validate_email?tokenId="
-                + tokenId + "&t=" + tokenClear;
+    public void sendVerificationEmail(String to, String tokenClear) {
+        String verificationLink = publicBaseUrl + "/validate_email?token="
+                + tokenClear;
 
         String body = "Bonjour,\n\n"
                 + "Merci pour votre inscription. Cliquez sur ce lien pour valider votre e-mail :\n"

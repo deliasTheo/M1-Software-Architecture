@@ -25,13 +25,12 @@ public class AuthEventPublisher {
     private String toJson(UserRegisteredEvent event) {
         UserRegisteredEvent.UserRegisteredData data = event.data();
         return String.format(
-                "{\"type\":\"%s\",\"eventId\":\"%s\",\"occurredAt\":\"%s\",\"data\":{\"userId\":%d,\"email\":\"%s\",\"tokenId\":%d,\"tokenClear\":\"%s\"}}",
+                "{\"type\":\"%s\",\"eventId\":\"%s\",\"occurredAt\":\"%s\",\"data\":{\"userId\":%d,\"email\":\"%s\",\"tokenClear\":\"%s\"}}",
                 esc(event.type()),
                 esc(event.eventId()),
                 esc(event.occurredAt()),
                 data.userId(),
                 esc(data.email()),
-                data.tokenId(),
                 esc(data.tokenClear())
         );
     }

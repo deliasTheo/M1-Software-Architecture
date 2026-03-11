@@ -10,7 +10,6 @@ public record UserRegisteredEvent(
     public record UserRegisteredData(
             Integer userId,
             String email,
-            Integer tokenId,
             String tokenClear
     ) {
     }

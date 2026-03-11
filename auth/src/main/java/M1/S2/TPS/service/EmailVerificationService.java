@@ -36,7 +36,6 @@ public class EmailVerificationService {
                 new UserRegisteredEvent.UserRegisteredData(
                         identity.getId(),
                         identity.getEmail(),
-                        validationToken.getId(),
                         validationToken.getTokenHash()
                 )
         );
