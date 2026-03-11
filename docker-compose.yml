@@ -1,11 +1,9 @@
 services:
   nginx:
-    image: nginx:1.27-alpine
+    build: ./nginx
     container_name: nginx
     ports:
       - "8080:80"
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - auth
       - serv_a
@@ -99,7 +97,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - ./db/data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
       - ./db/init:/docker-entrypoint-initdb.d:ro
     networks:
       - appnet
@@ -107,3 +105,6 @@ services:
 networks:
   appnet:
     driver: bridge
+
+volumes:
+  db-data:
