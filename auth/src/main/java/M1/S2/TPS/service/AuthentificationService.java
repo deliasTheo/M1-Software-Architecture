@@ -10,12 +10,15 @@ import M1.S2.TPS.exception.EmailAlreadyExistsException;
 import M1.S2.TPS.exception.EmailNotVerifiedException;
 import M1.S2.TPS.exception.InvalidCredentialsException;
 import M1.S2.TPS.exception.InvalidDataException;
-import M1.S2.TPS.entities.ValidationToken;
+import M1.S2.TPS.dto.SessionTokenResult;
 import M1.S2.TPS.entities.Credential;
 import M1.S2.TPS.entities.Identity;
 import M1.S2.TPS.entities.SessionToken;
+import M1.S2.TPS.entities.ValidationToken;
+import M1.S2.TPS.entities.Role;
 import M1.S2.TPS.repository.CredentialRepository;
 import M1.S2.TPS.repository.IdentityRepository;
+import M1.S2.TPS.repository.RoleRepository;
 import M1.S2.TPS.repository.SessionTokenRepository;
 import M1.S2.TPS.repository.ValidationTokenRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +42,7 @@ public class AuthentificationService {
     private final EmailVerificationService emailVerificationService;
     private final IdentityRepository identityRepository;
     private final CredentialRepository credentialRepository;
+    private final RoleRepository roleRepository;
     private final ValidationTokenRepository validationTokenRepository;
     private final SessionTokenRepository sessionTokenRepository;
    
@@ -62,10 +66,15 @@ public class AuthentificationService {
 
         String hashedPassword = passwordService.hashPassword(identityDTO.getPassword());
        
+        // get default role
+        Role defaultRole = roleRepository.findByName("user")
+                .orElseThrow(() -> new InvalidDataException("Rôle par défaut 'user' non trouvé"));
+
         // create identity
         Identity identity = new Identity();
         identity.setEmail(identityDTO.getEmail());
         identity.setUid(UUID.randomUUID().toString());
+        identity.setRole(defaultRole);
 
         // save identity first to get the ID
         identityRepository.save(identity);
@@ -78,17 +87,17 @@ public class AuthentificationService {
 
         identity.setCredential(credential);
 
-        // create and save validation token
+        // create and save validation token (stocké en brut)
         ValidationToken validationToken = tokenService.createValidationToken(identity);
         validationTokenRepository.save(validationToken);
 
-        // publish user registered event
-        emailVerificationService.publishUserRegisteredEvent(identity);
+        // publish user registered event with token
+        emailVerificationService.publishUserRegisteredEvent(identity, validationToken.getTokenHash());
 
 
     }
         
-    public SessionToken login(IdentityDTO identityDTO) {
+    public String login(IdentityDTO identityDTO) {
         // find identity by email
         Identity identity = identityRepository.findByEmail(identityDTO.getEmail())
                 .orElseThrow(InvalidCredentialsException::new);
@@ -105,9 +114,9 @@ public class AuthentificationService {
         }
 
         // create and return session token
-        SessionToken token = tokenService.createSessionToken(identity);
-        sessionTokenRepository.save(token);
-        return token;
+        SessionTokenResult result = tokenService.createSessionToken(identity);
+        sessionTokenRepository.save(result.sessionToken());
+        return result.rawToken();
 
     }
 

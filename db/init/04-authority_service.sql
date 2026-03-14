@@ -5,3 +5,4 @@ create table authority_service (
     created_at timestamp not null default now()
 );
 
+insert into authority_service (code, label) values ('A', 'Service A');

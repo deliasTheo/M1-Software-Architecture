@@ -6,13 +6,11 @@ import java.util.UUID;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
-import M1.S2.TPS.entities.ValidationToken;
 import M1.S2.TPS.entities.Identity;
 import M1.S2.TPS.exception.EmailAlreadyVerifiedException;
 import M1.S2.TPS.messaging.AuthEventPublisher;
 import M1.S2.TPS.messaging.UserRegisteredEvent;
 import M1.S2.TPS.repository.IdentityRepository;
-import M1.S2.TPS.repository.ValidationTokenRepository;
 import lombok.RequiredArgsConstructor;
 
 
@@ -20,15 +18,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EmailVerificationService {
     private final TokenService tokenService;
-    private final ValidationTokenRepository validationTokenRepository;
     private final IdentityRepository identityRepository;
     private final AuthEventPublisher authEventPublisher;
 
-    @Transactional(readOnly = true)
-    public void publishUserRegisteredEvent(Identity identity) {
-        ValidationToken validationToken = validationTokenRepository.findByIdentity(identity)
-                .orElseThrow(() -> new IllegalStateException("Validation token introuvable pour l'identite"));
-
+    public void publishUserRegisteredEvent(Identity identity, String rawToken) {
         UserRegisteredEvent event = new UserRegisteredEvent(
                 "UserRegistered",
                 UUID.randomUUID().toString(),
@@ -36,7 +29,7 @@ public class EmailVerificationService {
                 new UserRegisteredEvent.UserRegisteredData(
                         identity.getId(),
                         identity.getEmail(),
-                        validationToken.getTokenHash()
+                        rawToken
                 )
         );
 
@@ -51,7 +44,7 @@ public class EmailVerificationService {
             throw new EmailAlreadyVerifiedException();
         }
 
-        tokenService.verifyToken(identity, token);
+        tokenService.verifyTokenValidation(identity, token);
         identity.setVerified(true);
         identityRepository.save(identity);
     }

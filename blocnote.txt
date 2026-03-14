@@ -1,0 +1,13 @@
+/adminService/admin
+                    /addUser / prends un token
+                    /deleteUser -> a gerer, un modo peux pas delete un autre modo ou l'admin / prends un token
+                    /addRoleIdentity / prends un token
+                    /deleteRoleIdentity / prends un token
+
+/auth_service
+        /verifyRole -> modo ou admin ou user / prends un token
+
+
+-> admin se login 
+-> l'admin fait addUser -> il a besoin du token grace a login
+... 

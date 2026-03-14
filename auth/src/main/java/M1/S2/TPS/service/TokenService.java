@@ -2,14 +2,13 @@ package M1.S2.TPS.service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import M1.S2.TPS.entities.AbstractToken;
+import M1.S2.TPS.dto.SessionTokenResult;
 import M1.S2.TPS.entities.Identity;
 import M1.S2.TPS.entities.SessionToken;
 import M1.S2.TPS.entities.ValidationToken;
@@ -27,34 +26,72 @@ public class TokenService {
     private final ValidationTokenRepository validationTokenRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
+    // ==================== VALIDATION TOKENS (stockés en brut) ====================
+
     public ValidationToken createValidationToken(Identity identity) {
+        String rawToken = generateToken();
         ValidationToken validationToken = new ValidationToken();
         validationToken.setIdentity(identity);
-        validationToken.setTokenHash(hashToken(generateToken()));
+        validationToken.setTokenHash(rawToken);
         validationToken.setExpiresAt(LocalDateTime.now().plusMinutes(15));
         return validationToken;
     }
 
-    public SessionToken createSessionToken(Identity identity) {
-        SessionToken sessionToken = new SessionToken();
-        sessionToken.setIdentity(identity);
-        sessionToken.setTokenHash(hashToken(generateToken()));
-        sessionToken.setExpiresAt(LocalDateTime.now().plusHours(4));
-        return sessionToken;
+    public Identity getIdentityByValidationToken(String rawToken) {
+        ValidationToken validationToken = validationTokenRepository.findByTokenHash(rawToken)
+                .orElseThrow(InvalidTokenException::new);
+        
+        if (isTokenExpired(validationToken.getExpiresAt())) {
+            throw new InvalidTokenException();
+        }
+        
+        return validationToken.getIdentity();
     }
 
-    public void verifyToken(Identity identity, String token) {           
-        List<AbstractToken> tokens = new ArrayList<>();
-        for (SessionToken sessionToken : identity.getSessionTokens()) {
-            tokens.add(sessionToken);
+    public void verifyTokenValidation(Identity identity, String rawToken) {
+        ValidationToken validationToken = validationTokenRepository.findByIdentity(identity)
+                .orElseThrow(InvalidTokenException::new);
+
+        if (!validationToken.getTokenHash().equals(rawToken)) {
+            throw new InvalidTokenException();
         }
-        for (ValidationToken validationToken : identity.getValidationTokens()) {
-            tokens.add(validationToken);
+        if (isTokenExpired(validationToken.getExpiresAt())) {
+            throw new InvalidTokenException();
         }
-// check la validité du token
-        boolean isValid = tokens.stream().anyMatch(abstractToken -> 
-            !isTokenExpired(abstractToken.getExpiresAt()) && 
-            passwordEncoder.matches(token, abstractToken.getTokenHash())
+        if (validationToken.isUsed()) {
+            throw new InvalidTokenException();
+        }
+        validationToken.setUsed(true);
+        validationTokenRepository.save(validationToken);
+    }
+
+    // ==================== SESSION TOKENS (hashés avec BCrypt) ====================
+
+    public SessionTokenResult createSessionToken(Identity identity) {
+        String rawToken = generateToken();
+        SessionToken sessionToken = new SessionToken();
+        sessionToken.setIdentity(identity);
+        sessionToken.setTokenHash(hashToken(rawToken));
+        sessionToken.setExpiresAt(LocalDateTime.now().plusHours(4));
+        return new SessionTokenResult(rawToken, sessionToken);
+    }
+
+    public Identity getIdentityBySessionToken(String rawToken) {
+        List<SessionToken> allTokens = sessionTokenRepository.findAll();
+        
+        SessionToken matchingToken = allTokens.stream()
+                .filter(st -> !isTokenExpired(st.getExpiresAt()))
+                .filter(st -> passwordEncoder.matches(rawToken, st.getTokenHash()))
+                .findFirst()
+                .orElseThrow(InvalidTokenException::new);
+               
+        return matchingToken.getIdentity();
+    }
+
+    public void verifySessionToken(Identity identity, String rawToken) {           
+        boolean isValid = identity.getSessionTokens().stream().anyMatch(sessionToken -> 
+            !isTokenExpired(sessionToken.getExpiresAt()) && 
+            passwordEncoder.matches(rawToken, sessionToken.getTokenHash())
         );
         
         if (!isValid) {
@@ -62,7 +99,17 @@ public class TokenService {
         }
     }
 
- 
+    public SessionToken getSessionToken(String rawToken) {
+        List<SessionToken> allTokens = sessionTokenRepository.findAll();
+        
+        return allTokens.stream()
+                .filter(st -> passwordEncoder.matches(rawToken, st.getTokenHash()))
+                .findFirst()
+                .orElseThrow(InvalidTokenException::new);
+    }
+
+    // ==================== UTILS ====================
+
     private String hashToken(String token) {
         return passwordEncoder.encode(token);
     }
@@ -71,38 +118,17 @@ public class TokenService {
         SecureRandom random = new SecureRandom();
         byte[] tokenBytes = new byte[32];
         random.nextBytes(tokenBytes);
-        log.info("Génération d'un token :");
         return Base64.getUrlEncoder().withoutPadding().encodeToString(tokenBytes);
-    }
-
-    public Identity getIdentityBySessionToken(String token) {
-        SessionToken sessionToken = sessionTokenRepository.findByTokenHash(token)
-                .orElseThrow(InvalidTokenException::new);
-               
-        return sessionToken.getIdentity();
-    }
-
-    public Identity getIdentityByValidationToken(String token) {
-        ValidationToken validationToken = validationTokenRepository.findByTokenHash(token)
-                .orElseThrow(InvalidTokenException::new);
-        
-        return validationToken.getIdentity();
     }
 
     public static String extractBearerToken(String authorizationHeader) {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             throw new InvalidTokenException();
         }
-        log.info("Extracting bearer token from authorization header: {}", authorizationHeader);
         return authorizationHeader.substring(7);
     }
 
     private boolean isTokenExpired(LocalDateTime expiresAt) {
         return expiresAt.isBefore(LocalDateTime.now());
-    }
-
-    public SessionToken getSessionToken(String token) {
-        return sessionTokenRepository.findByTokenHash(hashToken(token))
-                .orElseThrow(InvalidTokenException::new);
     }
 }
