@@ -1,9 +1,12 @@
 package M1.S2.TPS.service;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import M1.S2.TPS.entities.AbstractToken;
@@ -22,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TokenService {
     private final SessionTokenRepository sessionTokenRepository;
     private final ValidationTokenRepository validationTokenRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     public ValidationToken createValidationToken(Identity identity) {
         ValidationToken validationToken = new ValidationToken();
@@ -47,20 +51,28 @@ public class TokenService {
         for (ValidationToken validationToken : identity.getValidationTokens()) {
             tokens.add(validationToken);
         }
-
-        if (!tokens.stream().anyMatch(abstractToken -> abstractToken.getTokenHash().equals(token) || isTokenExpired(abstractToken.getExpiresAt()))) {
+// check la validité du token
+        boolean isValid = tokens.stream().anyMatch(abstractToken -> 
+            !isTokenExpired(abstractToken.getExpiresAt()) && 
+            passwordEncoder.matches(token, abstractToken.getTokenHash())
+        );
+        
+        if (!isValid) {
             throw new InvalidTokenException();
         }
     }
 
-     // todo : semy
+ 
     private String hashToken(String token) {
-        return token;
+        return passwordEncoder.encode(token);
     }
 
-    // todo : semy
     private String generateToken() {
-        return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+        SecureRandom random = new SecureRandom();
+        byte[] tokenBytes = new byte[32];
+        random.nextBytes(tokenBytes);
+        log.info("Génération d'un token :");
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(tokenBytes);
     }
 
     public Identity getIdentityBySessionToken(String token) {
