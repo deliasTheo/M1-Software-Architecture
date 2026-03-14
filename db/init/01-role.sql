@@ -6,3 +6,4 @@ create table role (
 
 INSERT INTO role (name, description) VALUES ('user', 'User role');
 INSERT INTO role (name, description) VALUES ('admin', 'Admin role');
+INSERT INTO role (name, description) VALUES ('modo', 'Moderator role');
