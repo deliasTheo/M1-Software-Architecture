@@ -33,7 +33,7 @@ public class Authority {
 
     private String label;
 
-    @ManyToMany(mappedBy = "authorities", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "authorities")
     private Set<Identity> identities = new HashSet<>();
     
 
