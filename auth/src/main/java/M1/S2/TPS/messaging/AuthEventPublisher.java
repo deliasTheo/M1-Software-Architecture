@@ -14,28 +14,10 @@ public class AuthEventPublisher {
     private final MessagingProperties messagingProperties;
 
     public void publishUserRegistered(UserRegisteredEvent event) {
-        String payload = toJson(event);
         rabbitTemplate.convertAndSend(
                 messagingProperties.exchange(),
                 messagingProperties.userRegisteredRoutingKey(),
-                payload
+                event
         );
-    }
-
-    private String toJson(UserRegisteredEvent event) {
-        UserRegisteredEvent.UserRegisteredData data = event.data();
-        return String.format(
-                "{\"type\":\"%s\",\"eventId\":\"%s\",\"occurredAt\":\"%s\",\"data\":{\"userId\":%d,\"email\":\"%s\",\"tokenClear\":\"%s\"}}",
-                esc(event.type()),
-                esc(event.eventId()),
-                esc(event.occurredAt()),
-                data.userId(),
-                esc(data.email()),
-                esc(data.tokenClear())
-        );
-    }
-
-    private String esc(String value) {
-        return value == null ? "" : value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }
