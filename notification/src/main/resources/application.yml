@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: notification-service
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
+    listener:
+      simple:
+        default-requeue-rejected: false
+  mail:
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:1025}
+    properties:
+      mail.smtp.auth: ${SPRING_MAIL_SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${SPRING_MAIL_SMTP_STARTTLS_ENABLE:false}
+
+server:
+  port: 8080
+
+app:
+  public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}  # Nginx externe
+  mail:
+    from: ${APP_MAIL_FROM:no-reply@m1.local}
+  mq:
+    exchange: ${APP_MQ_EXCHANGE:auth.events}
+    dead-letter-exchange: ${APP_MQ_DLX_EXCHANGE:auth.events.dlq}
+    user-registered-routing-key: ${APP_MQ_RK_USER_REGISTERED:auth.user-registered}
+    user-registered-queue: ${APP_MQ_QUEUE_USER_REGISTERED:notification.user-registered}
+    user-registered-dlq-routing-key: ${APP_MQ_RK_USER_REGISTERED_DLQ:notification.user-registered.dlq}
+    user-registered-dlq: ${APP_MQ_QUEUE_USER_REGISTERED_DLQ:notification.user-registered.dlq}
