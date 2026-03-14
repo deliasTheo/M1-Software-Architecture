@@ -43,4 +43,10 @@ public class IdentityController {
         return ResponseEntity.ok("Email validé");
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@RequestBody TokenDTO token) {
+        authentificationService.logout(token.getToken());
+        return ResponseEntity.ok("Déconnexion réussie");
+    }
+
 }

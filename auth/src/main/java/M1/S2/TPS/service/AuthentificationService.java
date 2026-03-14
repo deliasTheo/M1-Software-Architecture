@@ -108,5 +108,12 @@ public class AuthentificationService {
         SessionToken token = tokenService.createSessionToken(identity);
         sessionTokenRepository.save(token);
         return token;
+
     }
+
+    public void logout(String token) {
+        SessionToken sessionToken = tokenService.getSessionToken(token);
+        sessionTokenRepository.delete(sessionToken);
+    }
+    
 }

@@ -88,4 +88,9 @@ public class TokenService {
     private boolean isTokenExpired(LocalDateTime expiresAt) {
         return expiresAt.isBefore(LocalDateTime.now());
     }
+
+    public SessionToken getSessionToken(String token) {
+        return sessionTokenRepository.findByTokenHash(hashToken(token))
+                .orElseThrow(InvalidTokenException::new);
+    }
 }
